@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const MonacoEditorPlugin = require("monaco-editor-webpack-plugin");
 
 const getResolvePath = (d) => path.resolve(__dirname, d);
 const srcResolvePath = getResolvePath("../src");
@@ -88,5 +89,8 @@ module.exports = {
       activeModules: false,
     }),
     new VueLoaderPlugin(),
+    new MonacoEditorPlugin({
+      languages: ["markdown", "javascript"],
+    }),
   ],
 };
