@@ -29,9 +29,11 @@
   "homepage": "https://github.com/ZzzNeko/vue-markdown-editor#readme",
   "dependencies": {
     "@types/markdown-it": "^10.0.1",
+    "@types/mermaid": "^8.2.1",
     "commander": "^5.1.0",
     "execa": "^4.0.3",
     "fs-extra": "^9.0.1",
+    "github-markdown-css": "^4.0.0",
     "listr": "^0.14.3",
     "markdown-it": "^11.0.0",
     "markdown-it-abbr": "^1.0.4",
