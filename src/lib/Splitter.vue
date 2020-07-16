@@ -6,7 +6,8 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import Vue, { PropType } from "vue";
+
 export default Vue.extend({
   name: "Splitter",
   props: {
@@ -16,7 +17,7 @@ export default Vue.extend({
       validator: val => /^vertical|horization$/.test(val)
     },
     scope: {
-      type: [String, HTMLElement],
+      type: [String, Object] as PropType<String | HTMLElement>,
       default: "window",
       validator: val =>
         (typeof val == "string" && /^window|container$/.test(val)) ||
@@ -39,21 +40,19 @@ export default Vue.extend({
     };
   },
   mounted() {
-    const splitter = this.$refs.splitter;
-    const container = splitter.parentNode || splitter.parentElement;
+    const splitter = (this.$refs.splitter as Element) as HTMLElement;
+    const container = splitter.parentElement;
     if (!container) throw new TypeError("splitter should be in a container");
-    const children = [].slice.call(container.children);
+    const children = [].slice.call(container.children) as Element[];
     const currentIdx = children.findIndex(i => i === splitter);
-    const prevNode = children[currentIdx - 1];
-    const nextNode = children[currentIdx + 1];
+    const prevNode = children[currentIdx - 1] as HTMLElement;
+    const nextNode = children[currentIdx + 1] as HTMLElement;
     const scope =
-      this.scope == "window"
-        ? window
-        : this.scope == "container"
-        ? container
-        : this.scope;
+      (this.scope == "window" && document.body) ||
+      (this.scope == "container" && container) ||
+      (this.scope as HTMLElement);
 
-    const mouseDownHandler = event => {
+    const mouseDownHandler = (event: MouseEvent) => {
       this.moveEnable = true;
       const { clientX, clientY } = event;
       this.startX = clientX;
@@ -66,7 +65,7 @@ export default Vue.extend({
       scope.addEventListener("mouseup", mouseUpHandler);
       scope.addEventListener("mouseleave", mouseLeaveHandler);
     };
-    const mouseMoveHandler = event => {
+    const mouseMoveHandler = (event: MouseEvent) => {
       if (!this.moveEnable) return;
       const { clientX, clientY } = event;
       const deltaX = clientX - this.startX;
@@ -94,13 +93,13 @@ export default Vue.extend({
         nextNode.style.height = nextHeight + "px";
       }
     };
-    const mouseUpHandler = event => {
+    const mouseUpHandler = (event: MouseEvent) => {
       this.moveEnable = false;
       scope.removeEventListener("mousemove", mouseMoveHandler);
       scope.removeEventListener("mouseup", mouseUpHandler);
       scope.removeEventListener("mouseleave", mouseLeaveHandler);
     };
-    const mouseLeaveHandler = event => {
+    const mouseLeaveHandler = (event: MouseEvent) => {
       this.moveEnable = false;
     };
     splitter.addEventListener("mousedown", mouseDownHandler);
