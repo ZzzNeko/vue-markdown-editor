@@ -80,7 +80,17 @@ module.exports = {
     }),
     new VueLoaderPlugin(),
     new MonacoEditorPlugin({
-      languages: ["markdown", "javascript"],
+      languages: [
+        "markdown",
+        "javascript",
+        "typescript",
+        "shell",
+        "css",
+        "scss",
+        "html",
+        "pug",
+        "graphql",
+      ],
     }),
   ],
 };
