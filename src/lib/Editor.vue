@@ -1,11 +1,11 @@
 <template lang="pug">
 .editor
-  .header-control
-    input.title(v-model="title")
+  //- .header-control
+  //-   input.title(v-model="title")
   .markdown-editor
     .monaco-editor(ref="editor")
     Splitter
-    .markdown-preview.markdown-body(v-html="markdownRender")
+    .markdown-preview.markdown-body(v-html="markdownRender" ref="preview")
 </template>
 
 <script lang="ts">
@@ -24,12 +24,14 @@ export default Vue.extend({
   data() {
     return {
       title: "233",
-      markdownRender: ""
+      markdownRender: "",
+      scrollTarget: ""
     };
   },
   methods: {
     init() {
       const editorDom = this.$refs.editor as HTMLElement;
+      const previewDom = this.$refs.preview as HTMLElement;
       const monacoEditor = monaco.editor.create(editorDom, {
         language: "markdown",
         fontSize: 18,
@@ -42,6 +44,29 @@ export default Vue.extend({
         this.markdownRender = result;
 
         mermaid.init("mermaid");
+      });
+      monacoEditor.onDidScrollChange(event => {
+        if (this.scrollTarget === "preview") return;
+        console.log("editor");
+        this.scrollTarget = "editor";
+        const { scrollTop, scrollHeight } = event;
+        const toTopPercent = scrollTop / scrollHeight;
+        previewDom.scrollTo({ top: previewDom.scrollHeight * toTopPercent });
+        setTimeout(() => {
+          this.scrollTarget = "";
+        }, 100);
+      });
+      previewDom.addEventListener("scroll", event => {
+        if (this.scrollTarget === "editor") return;
+        console.log("preview");
+        this.scrollTarget = "preview";
+        const toTopPercent = previewDom.scrollTop / previewDom.scrollHeight;
+        monacoEditor.setScrollTop(
+          monacoEditor.getScrollHeight() * toTopPercent
+        );
+        this.$nextTick(() => {
+          this.scrollTarget = "";
+        });
       });
     }
   },
@@ -61,9 +86,10 @@ export default Vue.extend({
   overflow: hidden
 .monaco-editor
   width: 50%
+  border-right: 1px solid #ccc
 .markdown-preview
   width: 50%
   overflow: scroll
-  border: 1px solid red
+  border-left: 1px solid #ccc
   padding: 14px
 </style>
