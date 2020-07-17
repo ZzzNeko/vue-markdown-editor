@@ -11,8 +11,8 @@
 <script lang="ts">
 import Vue from "vue";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
-import markdown from "./markdown";
 import mermaid from "mermaid";
+import markdown from "./markdown";
 import "github-markdown-css/github-markdown.css";
 import "highlight.js/styles/github-gist.css";
 import "./main.sass";
@@ -65,8 +65,6 @@ export default Vue.extend({
   },
   mounted() {
     this.init();
-    // @ts-ignore
-    window.mermaid = mermaid;
   }
 });
 </script>
