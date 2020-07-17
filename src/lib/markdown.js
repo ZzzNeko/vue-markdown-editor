@@ -14,7 +14,7 @@ import pluginTOC from "markdown-it-toc-done-right";
 import pluginAnchor from "markdown-it-anchor";
 import pluginLink from "markdown-it-link-attributes";
 import pluginAttrs from "markdown-it-attrs";
-import pluginMermaid from "markdown-it-mermaid";
+import pluginMermaid from "./mermaidPlugin";
 
 const markdownIt = new MarkdownIt({
   html: true,
