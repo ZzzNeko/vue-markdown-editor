@@ -52,6 +52,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "markdown-it-toc-done-right": "^4.1.0",
+    "mermaid": "^8.6.0",
     "monaco-editor": "^0.20.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3"
