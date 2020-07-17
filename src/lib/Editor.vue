@@ -12,7 +12,7 @@
 import Vue from "vue";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
 import markdown from "./markdown";
-import mermaid from "./mermaid";
+import mermaid from "mermaid";
 import "github-markdown-css/github-markdown.css";
 import "highlight.js/styles/github-gist.css";
 import "./main.sass";
@@ -25,7 +25,7 @@ export default Vue.extend({
     return {
       title: "233",
       markdownRender: "",
-      scrollTarget: ""
+      focus: ""
     };
   },
   methods: {
@@ -34,7 +34,7 @@ export default Vue.extend({
       const previewDom = this.$refs.preview as HTMLElement;
       const monacoEditor = monaco.editor.create(editorDom, {
         language: "markdown",
-        fontSize: 18,
+        fontSize: 16,
         automaticLayout: true
       });
       monacoEditor.onDidChangeModelContent(event => {
@@ -42,36 +42,31 @@ export default Vue.extend({
         const content = monacoEditor.getValue();
         const result = markdown.render(content);
         this.markdownRender = result;
-
-        mermaid.init("mermaid");
+        this.$nextTick(() => mermaid.init(".mermaid"));
       });
+      editorDom.addEventListener("mouseenter", e => (this.focus = "editor"));
+      previewDom.addEventListener("mouseenter", e => (this.focus = "preview"));
+      // NOTE: 给 DOM 设置 scrollTo 之后至触发 scroll 事件为宏任务
+      // 使用 setTimeout 修改 focus = '' 无法完全避免 previewDom 后续的执行
       monacoEditor.onDidScrollChange(event => {
-        if (this.scrollTarget === "preview") return;
-        console.log("editor");
-        this.scrollTarget = "editor";
-        const { scrollTop, scrollHeight } = event;
-        const toTopPercent = scrollTop / scrollHeight;
+        if (this.focus === "preview") return;
+        this.focus = "editor";
+        const toTopPercent = event.scrollTop / event.scrollHeight;
         previewDom.scrollTo({ top: previewDom.scrollHeight * toTopPercent });
-        setTimeout(() => {
-          this.scrollTarget = "";
-        }, 100);
       });
       previewDom.addEventListener("scroll", event => {
-        if (this.scrollTarget === "editor") return;
-        console.log("preview");
-        this.scrollTarget = "preview";
+        if (this.focus === "editor") return;
+        this.focus = "preview";
         const toTopPercent = previewDom.scrollTop / previewDom.scrollHeight;
-        monacoEditor.setScrollTop(
-          monacoEditor.getScrollHeight() * toTopPercent
-        );
-        this.$nextTick(() => {
-          this.scrollTarget = "";
-        });
+        const editorScrollTop = monacoEditor.getScrollHeight() * toTopPercent;
+        monacoEditor.setScrollTop(editorScrollTop);
       });
     }
   },
   mounted() {
     this.init();
+    // @ts-ignore
+    window.mermaid = mermaid;
   }
 });
 </script>
