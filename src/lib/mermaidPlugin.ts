@@ -11,6 +11,9 @@ function mermaidPlugin(md: markdown) {
     if (info.trim() === "mermaid") {
       try {
         mermaid.parse(content); // 验证内容语法是否正确
+        setTimeout(() => {
+          mermaid.init('.mermaid')
+        }, 0);
         return `<div class="mermaid">${content}</div>`;
       } catch ({ str, hash }) {
         return `<pre class="mermaid-error">${str}</pre>`;
@@ -18,6 +21,7 @@ function mermaidPlugin(md: markdown) {
     } else {
       return originalLogic ? originalLogic(tokens, idx, ...rest) : ''
     }
+
   };
 }
 
