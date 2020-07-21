@@ -1,3 +1,5 @@
 import MarkdownIt from 'markdown-it'
-declare const markdown: MarkdownIt
-export default markdown
+import { ExtendSupport } from "./config";
+
+export default function configMarkdownIt(config: ExtendSupport | null): MarkdownIt
+export { MarkdownIt }

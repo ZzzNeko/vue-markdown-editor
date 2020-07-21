@@ -1,35 +1,55 @@
 <template lang="pug">
 .editor
-  //- .header-control
-  //-   input.title(v-model="title")
   .markdown-editor
     .monaco-editor(ref="editor")
     Splitter
+    //- markdown-body classname for github
     .markdown-preview.markdown-body(v-html="markdownRender" ref="preview")
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import Vue, { PropType } from "vue";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
-import mermaid from "mermaid";
-import markdown from "./markdown";
+import configMarkdownIt, { MarkdownIt } from "./markdown";
 import "github-markdown-css/github-markdown.css";
 import "highlight.js/styles/github-gist.css";
-import "./main.sass";
 
 import Splitter from "./Splitter.vue";
+import { ExtendSupport } from "./config";
 
 export default Vue.extend({
   components: { Splitter },
+  props: {
+    extends: {
+      type: [Boolean, Object] as PropType<boolean | ExtendSupport>,
+      default: true
+    }
+  },
   data() {
     return {
       title: "233",
       markdownRender: "",
-      focus: ""
+      focus: "",
+      markdownConfig: null as ExtendSupport | null,
+      markdown: null as MarkdownIt | null
     };
   },
   methods: {
-    init() {
+    async initMarkdownIt() {
+      const markdownConfig = (() => {
+        if (this.extends === true)
+          return { highlight: true, highlightLines: true, mermaid: true };
+        if (this.extends === false) return null;
+        return {
+          highlight: this.extends.highlightLines || this.extends.highlight,
+          highlightLines: this.extends.highlightLines,
+          mermaid: this.extends.mermaid
+        };
+      })();
+      this.markdownConfig = markdownConfig;
+      this.markdown = await configMarkdownIt(markdownConfig);
+    },
+    initMonacoEditor() {
       const editorDom = this.$refs.editor as HTMLElement;
       const previewDom = this.$refs.preview as HTMLElement;
       const monacoEditor = monaco.editor.create(editorDom, {
@@ -40,9 +60,8 @@ export default Vue.extend({
       monacoEditor.onDidChangeModelContent(event => {
         // console.log(event);
         const content = monacoEditor.getValue();
-        const result = markdown.render(content);
+        const result = (this.markdown as MarkdownIt).render(content);
         this.markdownRender = result;
-        this.$nextTick(() => mermaid.init(".mermaid"));
       });
       editorDom.addEventListener("mouseenter", e => (this.focus = "editor"));
       previewDom.addEventListener("mouseenter", e => (this.focus = "preview"));
@@ -64,12 +83,18 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.init();
+    this.initMarkdownIt();
+    this.initMonacoEditor();
   }
 });
 </script>
 
 <style lang="sass" scoped>
+$color-violet-5: #845ef7
+$color-violet-6: #7950f2
+.mtk6
+  color: $color-violet-5 !important
+
 .editor
   height: 100%
 .markdown-editor
