@@ -1,5 +1,9 @@
 import MarkdownIt from 'markdown-it'
-import { ExtendSupport } from "./config";
+
+interface ExtendSupport {
+  highlight?: boolean;
+  mermaid?: boolean;
+}
 
 export default function configMarkdownIt(config: ExtendSupport | null): MarkdownIt
 export { MarkdownIt }

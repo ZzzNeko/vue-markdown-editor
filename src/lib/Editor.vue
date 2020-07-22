@@ -11,11 +11,13 @@
 import Vue, { PropType } from "vue";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
 import configMarkdownIt, { MarkdownIt } from "./markdown";
-import "github-markdown-css/github-markdown.css";
-import "highlight.js/styles/github-gist.css";
 
 import Splitter from "./Splitter.vue";
-import { ExtendSupport } from "./config";
+
+interface ExtendSupport {
+  highlight?: boolean;
+  mermaid?: boolean;
+}
 
 export default Vue.extend({
   components: { Splitter },
@@ -27,26 +29,21 @@ export default Vue.extend({
   },
   data() {
     return {
-      title: "233",
+      markdown: null as MarkdownIt | null,
       markdownRender: "",
-      focus: "",
-      markdownConfig: null as ExtendSupport | null,
-      markdown: null as MarkdownIt | null
+      focus: ""
     };
   },
   methods: {
     async initMarkdownIt() {
       const markdownConfig = (() => {
-        if (this.extends === true)
-          return { highlight: true, highlightLines: true, mermaid: true };
+        if (this.extends === true) return { highlight: true, mermaid: true };
         if (this.extends === false) return null;
         return {
-          highlight: this.extends.highlightLines || this.extends.highlight,
-          highlightLines: this.extends.highlightLines,
-          mermaid: this.extends.mermaid
+          highlight: this.extends.highlight || false,
+          mermaid: this.extends.mermaid || false
         };
       })();
-      this.markdownConfig = markdownConfig;
       this.markdown = await configMarkdownIt(markdownConfig);
     },
     initMonacoEditor() {

@@ -1,0 +1,19 @@
+@import './colorlib'
+  
+.custom-block
+  padding: 10px 20px
+  margin: 1em 0
+  &.-info
+    border-left: 8px solid $indigo-3
+    background: linear-gradient(to right, $indigo-1, rgba($indigo-0, 0.6))
+    color: $indigo-9
+  &.-note
+    border-left: 8px solid $red-3
+    background: linear-gradient(to right, $red-1, rgba($red-0, 0.6))
+    color: $red-9
+  
+  p
+    margin: 0
+    padding: 0
+    line-height: 1.5em
+    font-size: 16px

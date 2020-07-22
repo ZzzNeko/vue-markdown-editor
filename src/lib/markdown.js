@@ -12,14 +12,10 @@ import pluginLink from "markdown-it-link-attributes";
 import pluginAttrs from "markdown-it-attrs";
 import pluginTOC from "markdown-it-toc-done-right";
 import pluginAnchor from "markdown-it-anchor";
-// import pluginHighlight from "markdown-it-highlightjs";
-// import pluginHighlightLines from "markdown-it-highlight-lines";
-// import pluginMermaid, { mermaid } from "./mermaidPlugin";
+import "github-markdown-css/github-markdown.css";
+import "./markdown-custom-block.sass";
 
-const markdownIt = new MarkdownIt({
-  html: true,
-  linkify: true,
-});
+const markdownIt = new MarkdownIt({ html: true, linkify: true });
 
 async function configMarkdownIt(config) {
   markdownIt
@@ -29,7 +25,20 @@ async function configMarkdownIt(config) {
     .use(pluginSup)
     .use(pluginMark)
     .use(pluginFoot)
-    .use(pluginBlock)
+    .use(pluginBlock, "info", {
+      validate: (param) => /^info$/.test(param.trim()),
+      render: (tokens, index) =>
+        tokens[index].nesting === 1
+          ? `<div class="custom-block -info">`
+          : "</div>\n",
+    })
+    .use(pluginBlock, "note", {
+      validate: (param) => /^note$/.test(param.trim()),
+      render: (tokens, index) =>
+        tokens[index].nesting === 1
+          ? `<div class="custom-block -note">`
+          : "</div>\n",
+    })
     .use(pluginDefList)
     .use(pluginTOC)
     .use(pluginAnchor)
@@ -38,18 +47,17 @@ async function configMarkdownIt(config) {
     })
     .use(pluginAttrs);
   if (config) {
+    // prettier-ignore
     if (config.highlight) {
-      const pluginHighlight = await import("markdown-it-highlightjs");
-      markdownIt.use(pluginHighlight.default, {
-        inline: true,
-      });
-    }
-    if (config.highlightLines) {
-      const pluginHighlightLines = await import("markdown-it-highlight-lines");
+      const pluginHighlight = await import(/* webpackChunkName: 'highlight' */ "markdown-it-highlightjs");
+      const pluginHighlightLines = await import(/* webpackChunkName: 'highlight-lines' */ "markdown-it-highlight-lines");
+      await import("highlight.js/styles/github-gist.css")
+      markdownIt.use(pluginHighlight.default, { inline: true });
       markdownIt.use(pluginHighlightLines.default);
     }
+    // prettier-ignore
     if (config.mermaid) {
-      const pluginMermaid = await import("./mermaidPlugin");
+      const pluginMermaid = await import(/* webpackChunkName: 'mermaid' */ "./mermaidPlugin");
       markdownIt.use(pluginMermaid.default);
     }
   }
