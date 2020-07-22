@@ -29,6 +29,10 @@ export default Vue.extend({
       moveEnable: false,
       startX: 0,
       startY: 0,
+      container: {
+        width: 0,
+        height: 0
+      },
       prev: {
         width: 0,
         height: 0
@@ -57,6 +61,8 @@ export default Vue.extend({
       const { clientX, clientY } = event;
       this.startX = clientX;
       this.startY = clientY;
+      this.container.width = container.offsetWidth;
+      this.container.height = container.offsetHeight;
       this.prev.width = prevNode.offsetWidth;
       this.prev.height = prevNode.offsetHeight;
       this.next.width = nextNode.offsetWidth;
@@ -78,8 +84,9 @@ export default Vue.extend({
           prevWidth = prevWidth < 0 ? 0 : this.prev.width + this.next.width;
           nextWidth = nextWidth < 0 ? 0 : this.prev.width + this.next.width;
         }
-        prevNode.style.width = prevWidth + "px";
-        nextNode.style.width = nextWidth + "px";
+        const { width: parentWidth } = this.container;
+        prevNode.style.width = (prevWidth / parentWidth) * 100 + "%";
+        nextNode.style.width = (nextWidth / parentWidth) * 100 + "%";
       }
       if (this.direction === "horization") {
         // 竖向移动
@@ -89,8 +96,9 @@ export default Vue.extend({
           prevHeight = prevHeight < 0 ? 0 : this.prev.height + this.next.height;
           nextHeight = nextHeight < 0 ? 0 : this.prev.height + this.next.height;
         }
-        prevNode.style.height = prevHeight + "px";
-        nextNode.style.height = nextHeight + "px";
+        const { height: parentHeight } = this.container;
+        prevNode.style.height = (prevHeight / parentHeight) * 100 + "%";
+        nextNode.style.height = (nextHeight / parentHeight) * 100 + "%";
       }
     };
     const mouseUpHandler = (event: MouseEvent) => {
