@@ -1,37 +1,62 @@
 <template lang="pug">
 .editor
+  .tool-bar
+    .text-tools
+    .view-tools
+      .tool-btn(@click="switchView('edit')")
+        svg.icon(aria-hidden="true")
+          use(xlink:href="#icon-edit")
+      .tool-btn(@click="switchView('view')")
+        svg.icon(aria-hidden="true")
+          use(xlink:href="#icon-view")
+      .tool-btn(@click="switchView('half')")
+        svg.icon(aria-hidden="true")
+          use(xlink:href="#icon-half")
   .markdown-editor
-    .monaco-editor(ref="editor")
-    Splitter
-    //- markdown-body classname for github
-    .markdown-preview.markdown-body(v-html="markdownRender" ref="preview")
+    .monaco-editor(v-show="visible.editor", ref="editor")
+    Splitter(v-show="visible.splitter")
+    .markdown-preview(v-show="visible.preview", ref="preview")
+      .scroll-decoration(v-show="renderScrollTop > 0")
+      .markdown-body(v-html="render", ref="render")
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
 import configMarkdownIt, { MarkdownIt } from "./markdown";
-
 import Splitter from "./Splitter.vue";
+import "./iconfont.js";
+import "./iconfont.sass";
 
 interface ExtendSupport {
   highlight?: boolean;
   mermaid?: boolean;
 }
 
+type Keys = "edit" | "view" | "half";
+
 export default Vue.extend({
   components: { Splitter },
   props: {
     extends: {
       type: [Boolean, Object] as PropType<boolean | ExtendSupport>,
-      default: true
-    }
+      default: true,
+    },
   },
   data() {
     return {
       markdown: null as MarkdownIt | null,
-      markdownRender: "",
-      focus: ""
+      render: "",
+      focus: "",
+      visible: {
+        editor: true,
+        splitter: true,
+        preview: true,
+      },
+      editorDom: null as HTMLElement | null,
+      previewDom: null as HTMLElement | null,
+      renderDom: null as HTMLElement | null,
+      renderScrollTop: 0,
     };
   },
   methods: {
@@ -41,7 +66,7 @@ export default Vue.extend({
         if (this.extends === false) return null;
         return {
           highlight: this.extends.highlight || false,
-          mermaid: this.extends.mermaid || false
+          mermaid: this.extends.mermaid || false,
         };
       })();
       this.markdown = await configMarkdownIt(markdownConfig);
@@ -49,40 +74,58 @@ export default Vue.extend({
     initMonacoEditor() {
       const editorDom = this.$refs.editor as HTMLElement;
       const previewDom = this.$refs.preview as HTMLElement;
+      const renderDom = this.$refs.render as HTMLElement;
+      this.editorDom = editorDom;
+      this.previewDom = previewDom;
+      this.renderDom = renderDom;
       const monacoEditor = monaco.editor.create(editorDom, {
         language: "markdown",
         fontSize: 16,
-        automaticLayout: true
+        automaticLayout: true,
       });
-      monacoEditor.onDidChangeModelContent(event => {
+      monacoEditor.onDidChangeModelContent((event) => {
         // console.log(event);
         const content = monacoEditor.getValue();
         const result = (this.markdown as MarkdownIt).render(content);
-        this.markdownRender = result;
+        this.render = result;
       });
-      editorDom.addEventListener("mouseenter", e => (this.focus = "editor"));
-      previewDom.addEventListener("mouseenter", e => (this.focus = "preview"));
+      editorDom.addEventListener("mouseenter", (e) => (this.focus = "editor"));
+      renderDom.addEventListener("mouseenter", (e) => (this.focus = "render"));
       // NOTE: 给 DOM 设置 scrollTo 之后至触发 scroll 事件为宏任务
-      // 使用 setTimeout 修改 focus = '' 无法完全避免 previewDom 后续的执行
-      monacoEditor.onDidScrollChange(event => {
-        if (this.focus === "preview") return;
+      // 使用 setTimeout 修改 focus = '' 无法完全避免 renderDom 后续的执行
+      monacoEditor.onDidScrollChange((event) => {
+        if (this.focus === "render") return;
         this.focus = "editor";
         const toTopPercent = event.scrollTop / event.scrollHeight;
-        previewDom.scrollTo({ top: previewDom.scrollHeight * toTopPercent });
+        renderDom.scrollTo({ top: renderDom.scrollHeight * toTopPercent });
       });
-      previewDom.addEventListener("scroll", event => {
+      renderDom.addEventListener("scroll", (event) => {
+        this.renderScrollTop = renderDom.scrollTop;
         if (this.focus === "editor") return;
-        this.focus = "preview";
-        const toTopPercent = previewDom.scrollTop / previewDom.scrollHeight;
+        this.focus = "render";
+        const toTopPercent = renderDom.scrollTop / renderDom.scrollHeight;
         const editorScrollTop = monacoEditor.getScrollHeight() * toTopPercent;
         monacoEditor.setScrollTop(editorScrollTop);
       });
-    }
+    },
+    switchView(key: Keys) {
+      this.visible.editor = key === "edit" || key === "half";
+      this.visible.splitter = key === "half";
+      this.visible.preview = key === "view" || key === "half";
+      if (this.editorDom) {
+        this.editorDom.style.width =
+          (key === "edit" && "100%") || (key === "view" && "0") || "50%";
+      }
+      if (this.previewDom) {
+        this.previewDom.style.width =
+          (key === "edit" && "0") || (key === "view" && "100%") || "50%";
+      }
+    },
   },
   mounted() {
     this.initMarkdownIt();
     this.initMonacoEditor();
-  }
+  },
 });
 </script>
 
@@ -93,18 +136,53 @@ $color-violet-6: #7950f2
   color: $color-violet-5 !important
 
 .editor
-  height: 100%
-.markdown-editor
   display: flex
-  align-items: stretch
-  height: 100%
-  overflow: hidden
-.monaco-editor
-  width: 50%
-  border-right: 1px solid #ccc
-.markdown-preview
-  width: 50%
-  overflow: scroll
-  border-left: 1px solid #ccc
-  padding: 14px
+  flex-direction: column
+  box-shadow: 0 0 1px #ccc
+
+  & > .tool-bar
+    display: flex
+    justify-content: space-between
+    align-items: center
+    box-shadow: 0 1px 4px #ccc
+    
+    .text-tools
+      display: flex
+    .view-tools
+      display: flex
+    .tool-btn
+      display: flex
+      justify-content: center
+      align-items: center
+      background-color: #eee
+      width: 24px
+      height: 24px
+      margin: 4px
+      cursor: pointer
+
+  & > .markdown-editor
+    display: flex
+    align-items: stretch
+    height: 100%
+    overflow: hidden
+    background-color: #fff
+    .monaco-editor
+      width: 50%
+      border-right: 1px solid #ccc
+    .markdown-preview
+      position: relative
+      width: 50%
+      border-left: 1px solid #ccc
+      .scroll-decoration
+        box-shadow: #dddddd 0 6px 6px -6px inset
+        position: absolute
+        top: 0
+        left: 0
+        right: 0
+        height: 6px
+      .markdown-body
+        overflow: scroll
+        padding: 14px
+        height: 100%
+
 </style>
