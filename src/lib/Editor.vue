@@ -88,6 +88,8 @@ export default Vue.extend({
         const content = monacoEditor.getValue();
         const result = (this.markdown as MarkdownIt).render(content);
         this.render = result;
+        this.$emit("change", result);
+        console.log(result);
       });
       editorDom.addEventListener("mouseenter", (e) => (this.focus = "editor"));
       renderDom.addEventListener("mouseenter", (e) => (this.focus = "render"));
@@ -122,8 +124,8 @@ export default Vue.extend({
       }
     },
   },
-  mounted() {
-    this.initMarkdownIt();
+  async mounted() {
+    await this.initMarkdownIt();
     this.initMonacoEditor();
   },
 });
@@ -144,7 +146,6 @@ $color-violet-6: #7950f2
     display: flex
     justify-content: space-between
     align-items: center
-    box-shadow: 0 1px 4px #ccc
     
     .text-tools
       display: flex
@@ -157,7 +158,7 @@ $color-violet-6: #7950f2
       background-color: #eee
       width: 24px
       height: 24px
-      margin: 4px
+      margin: 3px
       cursor: pointer
 
   & > .markdown-editor
