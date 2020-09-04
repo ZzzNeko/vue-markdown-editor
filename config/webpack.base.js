@@ -71,6 +71,10 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.(txt|md)$/,
+        use: ['raw-loader']
+      }
     ],
   },
   plugins: [
