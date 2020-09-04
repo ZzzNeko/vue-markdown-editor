@@ -3,13 +3,22 @@
   .tool-bar
     .text-tools
     .view-tools
-      .tool-btn(@click="switchView('edit')")
+      .tool-btn(
+        :class="{ '-checked': visible.editor && !visible.splitter }",
+        @click="switchView('edit')"
+      )
         svg.icon(aria-hidden="true")
           use(xlink:href="#icon-edit")
-      .tool-btn(@click="switchView('view')")
+      .tool-btn(
+        :class="{ '-checked': visible.preview && !visible.splitter }",
+        @click="switchView('view')"
+      )
         svg.icon(aria-hidden="true")
           use(xlink:href="#icon-view")
-      .tool-btn(@click="switchView('half')")
+      .tool-btn(
+        :class="{ '-checked': visible.splitter }",
+        @click="switchView('half')"
+      )
         svg.icon(aria-hidden="true")
           use(xlink:href="#icon-half")
   .markdown-editor
@@ -84,12 +93,10 @@ export default Vue.extend({
         automaticLayout: true,
       });
       monacoEditor.onDidChangeModelContent((event) => {
-        // console.log(event);
         const content = monacoEditor.getValue();
         const result = (this.markdown as MarkdownIt).render(content);
         this.render = result;
-        this.$emit("change", result);
-        console.log(result);
+        this.$emit("change", { source: content, render: result });
       });
       editorDom.addEventListener("mouseenter", (e) => (this.focus = "editor"));
       renderDom.addEventListener("mouseenter", (e) => (this.focus = "render"));
@@ -116,11 +123,11 @@ export default Vue.extend({
       this.visible.preview = key === "view" || key === "half";
       if (this.editorDom) {
         this.editorDom.style.width =
-          (key === "edit" && "100%") || (key === "view" && "0") || "50%";
+          (key == "edit" && "100%") || (key == "view" && "0") || "50%";
       }
       if (this.previewDom) {
         this.previewDom.style.width =
-          (key === "edit" && "0") || (key === "view" && "100%") || "50%";
+          (key == "edit" && "0") || (key == "view" && "100%") || "50%";
       }
     },
   },
@@ -132,10 +139,10 @@ export default Vue.extend({
 </script>
 
 <style lang="sass" scoped>
-$color-violet-5: #845ef7
-$color-violet-6: #7950f2
+@import './colorlib.sass'
+
 .mtk6
-  color: $color-violet-5 !important
+  color: $violet-5 !important
 
 .editor
   display: flex
@@ -155,11 +162,14 @@ $color-violet-6: #7950f2
       display: flex
       justify-content: center
       align-items: center
-      background-color: #eee
-      width: 24px
-      height: 24px
-      margin: 3px
+      width: 28px
+      height: 28px
+      margin: 4px
       cursor: pointer
+      border: 1px solid $grey-3
+      &.-checked
+        background-color: $grey-2
+        cursor: auto
 
   & > .markdown-editor
     display: flex
