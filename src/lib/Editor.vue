@@ -31,9 +31,10 @@
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
-import configMarkdownIt, { MarkdownIt } from "./markdown";
 import Splitter from "./Splitter.vue";
+import configMarkdownIt, { MarkdownIt } from "./markdown";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
+import "./editor.sass";
 import "./iconfont.js";
 import "./iconfont.sass";
 
@@ -47,6 +48,7 @@ type Keys = "edit" | "view" | "half";
 export default Vue.extend({
   components: { Splitter },
   props: {
+    content: { type: String, default: "" },
     extends: {
       type: [Boolean, Object] as PropType<boolean | ExtendSupport>,
       default: true,
@@ -92,12 +94,15 @@ export default Vue.extend({
         fontSize: 16,
         automaticLayout: true,
       });
-      monacoEditor.onDidChangeModelContent((event) => {
+      const renderContent = () => {
         const content = monacoEditor.getValue();
         const result = (this.markdown as MarkdownIt).render(content);
         this.render = result;
         this.$emit("change", { source: content, render: result });
-      });
+      };
+      monacoEditor.setValue(this.content);
+      renderContent();
+      monacoEditor.onDidChangeModelContent(renderContent);
       editorDom.addEventListener("mouseenter", (e) => (this.focus = "editor"));
       renderDom.addEventListener("mouseenter", (e) => (this.focus = "render"));
       // NOTE: 给 DOM 设置 scrollTo 之后至触发 scroll 事件为宏任务
@@ -140,9 +145,6 @@ export default Vue.extend({
 
 <style lang="sass" scoped>
 @import './colorlib.sass'
-
-.mtk6
-  color: $violet-5 !important
 
 .editor
   display: flex
