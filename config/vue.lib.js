@@ -15,11 +15,12 @@ module.exports = {
   // ============================================= //
 
   libEntry: {
-    main: path.resolve(__dirname, "../src/lib/index.ts"),
+    main: path.resolve(__dirname, "../src/lib/Editor.vue"),
   },
   libOutput: {
     path: path.resolve(__dirname, "../dist/lib"),
     filename: `index.js`,
+    chunkFilename: "js/[name].js",
     library: `${name}`,
     libraryTarget: "umd",
   },

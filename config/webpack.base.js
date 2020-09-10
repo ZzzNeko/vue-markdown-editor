@@ -57,7 +57,10 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: ["file-loader"],
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]"
+        }
       },
       {
         test: /\.(png|jpg|gif)/,
@@ -84,17 +87,15 @@ module.exports = {
     }),
     new VueLoaderPlugin(),
     new MonacoEditorPlugin({
+      filename: "monoco.js",
       languages: [
         "markdown",
         "javascript",
         "typescript",
         "shell",
         "css",
-        "scss",
         "html",
-        "pug",
-        "graphql",
-      ],
+      ]
     }),
   ],
 };
