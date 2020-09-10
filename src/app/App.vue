@@ -17,8 +17,6 @@ export default Vue.extend({
   methods: {
     getValue(value: { source: string; render: string }) {
       const { source, render } = value;
-      console.log("source: ", source);
-      console.log("render: ", render);
     },
   },
 });
@@ -32,7 +30,7 @@ export default Vue.extend({
   align-items: center
 
   .editor
-    width: 800px
-    height: 600px
+    width: 1280px
+    height: 800px
     border: 1px solid #ccc
 </style>

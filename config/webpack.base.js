@@ -1,7 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
-const MonacoEditorPlugin = require("monaco-editor-webpack-plugin");
+// const MonacoEditorPlugin = require("monaco-editor-webpack-plugin");
 
 module.exports = {
   resolve: {
@@ -86,16 +86,15 @@ module.exports = {
       activeModules: false,
     }),
     new VueLoaderPlugin(),
-    new MonacoEditorPlugin({
-      filename: "monoco.js",
-      languages: [
-        "markdown",
-        "javascript",
-        "typescript",
-        "shell",
-        "css",
-        "html",
-      ]
-    }),
+    // new MonacoEditorPlugin({
+    //   languages: [
+    //     "markdown",
+    //     "javascript",
+    //     "typescript",
+    //     "shell",
+    //     "css",
+    //     "html",
+    //   ]
+    // }),
   ],
 };

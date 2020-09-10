@@ -33,7 +33,8 @@
 import Vue, { PropType } from "vue";
 import Splitter from "./Splitter.vue";
 import configMarkdownIt, { MarkdownIt } from "./markdown";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
+// import { editor } from "monaco-editor/esm/vs/editor/editor.api.js";
+import { editor } from "monaco-editor";
 import "./editor.sass";
 import "./iconfont.js";
 import "./iconfont.sass";
@@ -89,7 +90,7 @@ export default Vue.extend({
       this.editorDom = editorDom;
       this.previewDom = previewDom;
       this.renderDom = renderDom;
-      const monacoEditor = monaco.editor.create(editorDom, {
+      const monacoEditor = editor.create(editorDom, {
         language: "markdown",
         fontSize: 16,
         automaticLayout: true,
