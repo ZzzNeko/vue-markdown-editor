@@ -50,10 +50,11 @@ async function configMarkdownIt(config) {
     // prettier-ignore
     if (config.highlight) {
       const pluginHighlight = await import(/* webpackChunkName: 'highlight' */ "markdown-it-highlightjs");
-      const pluginHighlightLines = await import(/* webpackChunkName: 'highlight-lines' */ "markdown-it-highlight-lines");
       await import("highlight.js/styles/github-gist.css")
       markdownIt.use(pluginHighlight.default, { inline: true });
-      markdownIt.use(pluginHighlightLines.default);
+      // TODO: highlight lines 插件无效，与 highlightjs 配合无法获取到 指定语言后面 {n} 部分的内容
+      // const pluginHighlightLines = await import(/* webpackChunkName: 'highlight-lines' */ "markdown-it-highlight-lines");
+      // markdownIt.use(pluginHighlightLines.default);
     }
     // prettier-ignore
     if (config.mermaid) {
