@@ -3,7 +3,6 @@ node_modules/
 
 # output
 dist
-!dist/app
 type
 @type
 types
